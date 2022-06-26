@@ -4,14 +4,12 @@ const https = require("https");
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
-
-app.use(express.json());
 app.use(express.static("public"));
 
-app.get("/", function (req, res) {
+app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
-app.post("/", function (req, res) {
+app.post("/", (req, res) => {
   const { name, surname, email, phone } = req.body;
 
   const addData = {
@@ -32,12 +30,15 @@ app.post("/", function (req, res) {
   let url = "https://us1.api.mailchimp.com/3.0/lists/780daf7ad0";
   let options = {
     method: "POST",
-    auth: "ayan:685fc330d2fd7ddd4f71ae098ae2e2ea-us1",
-    server: "us1",
+    auth: "ayan:922fd0cc812dc993f54345d33b293a60-us1",
   };
 
-  const mailChimp = https.request(url, options, (res) => {
-    console.log(res.statusCode);
+  const mailChimp = https.request(url, options, (respond) => {
+    if (respond.statusCode === 200) {
+      res.sendFile(__dirname + "/success.html");
+    } else {
+      res.sendFile(__dirname + "/failure.html");
+    }
 
     res.on("data", (data) => {
       console.log(JSON.parse(data));
@@ -45,7 +46,10 @@ app.post("/", function (req, res) {
   });
   mailChimp.write(addDataJSON);
   mailChimp.end();
-  res.send("ty tochno down");
+});
+
+app.get("/reset", (req, res) => {
+  res.redirect("/");
 });
 
 const PORT = process.env.PORT || 8888;
